@@ -1,95 +1,86 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
+
+import { useEffect, useState } from 'react';
+import { GetOfData } from './services/services';
+import { v4 as uuidv4 } from 'uuid';
+import { Button } from 'react-bootstrap';
+import Pie from './components/Pie';
+import Pie2 from './components/Pie2';
+import mapUnits from './mapUnits';
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    const [data, setData] = useState(null);
+    const [selectedUnit, setSelectedUnit] = useState('termicas');
+
+    useEffect(() => {
+        GetOfData(uuidv4()).then((val) => {
+            setData(val);
+        });
+    }, []);
+
+    const refreshData = () => {
+        GetOfData(uuidv4()).then((val) => {
+            setData(val);
+        });
+    };
+
+    const { pie, pie2, unit } = data || {};
+
+    const transformedUnits = mapUnits(unit);
+    const filteredUnits = transformedUnits.filter((unit) => unit.type === selectedUnit);
+    // console.log(filteredUnits)
+
+    const seriesData = filteredUnits.map((unit) => unit.value); 
+    const labelsData = filteredUnits.map((unit) => unit.name);
+    const typeData = filteredUnits.map((unit) => unit.type);
+  
+
+    return (
+        <>
+
+    <header className="bg-primary text-white py-3">
+      <div className="container">
+        <h1 className="text-center">Centro Nacional de Despacho</h1>
+      </div>
+    </header>
+
+      <div className="m-5 row">
+            <div className="col-md-6">
+                <Pie
+                    series={pie2}
+                    type={'donut'}
+                />
+            </div>
+            <div className="col-md-6">
+                <Pie
+                    series={pie}
+                    type={'pie'}
+                />
+            </div>
         </div>
-      </div>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+        {/* <label htmlFor="unit">Generador: </label> */}
+        <select
+        class="form-select form-select-lg mb-5 w-25" aria-label="Large select example"
+        name="unit" 
+        id="unit"
+         onChange={(e) => setSelectedUnit(e.target.value)}>
+           {/* <option selected>Generador</option> */}
+            <option value="termicas">Térmicas</option>
+            <option value="hidroelectricas">Hidroeléctricas</option>
+            <option value="solares">Solares</option>
+            <option value="eolicas">Eólicas</option>
+        </select>
+
+      
+        <Pie2
+            series={seriesData}
+            labels={labelsData} 
+            type={'bar'}
         />
-      </div>
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+        <Button onClick={refreshData}>ACTUALIZAR GRÁFICAS</Button>
+            
+        </>
+    );
 }
