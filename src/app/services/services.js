@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const DATAURL = 'http://localhost:8000/generadoras/api/generadoras';
-
+//const DATAURL = 'http://localhost:8000/generadoras/api/generadoras';
+const DATAURL = 'https://backend-generadores.onrender.com/generadoras/api/generadoras';
 export const GetOfData  = async ( id ) =>  {
     try {
         const request = await axios.post(DATAURL, { id });
